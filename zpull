@@ -1,0 +1,80 @@
+#!/usr/bin/env node
+const {NodeClient} = require('hs-client');
+const {Network} = require('hsd');
+const {Resource} = require('hsd/lib/dns/resource');
+const fs = require('fs');
+const constants = require("./lib/constants.js");
+const prepend = require('prepend');
+
+const network = Network.get('main');
+const nodeOptions = {
+  network: network.type,
+  port: network.rpcPort,
+  apiKey: fs.readFileSync(__dirname+"/keys/node").toString().trim()
+};
+const nodeClient = new NodeClient(nodeOptions);
+
+// Aliases
+async function getBlock(height) { return await nodeClient.getBlock(height) }
+async function getBlockTx(txh) { return await nodeClient.getTX(txh) }
+async function getNameByHash(hash) { return await nodeClient.execute('getnamebyhash', [ hash ]) }
+async function getHeight() { return await nodeClient.execute('getblockcount') }
+
+// Functions
+async function getUpdates(block) {
+  let rupdates = [];
+  for(let x=0;x<block.txs.length;x++) {
+    const tx = block.txs[x];
+    for(let y=0;y<tx.outputs.length;y++) {
+      const output = tx.outputs[y];
+      if(output.covenant.action === "UPDATE") {
+        let name = await getNameByHash(output.covenant.items[0]);
+        if(output.covenant.items[2].length!=0) {
+          let records = await Resource.decode(Buffer.from(output.covenant.items[2],'hex')).getJSON(name);
+          rupdates.push({ name: name, records: records.records });
+        }
+      }
+    }
+  }
+  return rupdates;
+}
+function findZooko(record) {
+  for(let x=0;x<record.length;x++) {
+    const rec = record[x];
+    if(rec.type=='TXT' && rec.txt) {
+      for(let y=0;y<rec.txt.length;y++) {
+        const txt = rec.txt[y];
+        if(txt.startsWith(constants.MAGIC_ZOOKO))
+          return txt.substr(constants.MAGIC_ZOOKO_LENGTH);
+      }
+    }
+  }
+  return null;
+}
+
+(async () => {
+  let x;
+  if(fs.existsSync(__dirname+"/.lastBlock"))
+    x = parseInt(fs.readFileSync(__dirname+"/.lastBlock"));
+  else
+    x = constants.ZOOKO_START;
+  if(!x)
+    x = constants.ZOOKO_START;
+
+  const height = await getHeight();
+
+  for(;x<=height;x++) {
+    console.log(x);
+    let block = await getBlock(x);
+    let updates = await getUpdates(block);
+    if(updates.length>0) {
+      for(let y=0;y<updates.length;y++) {
+        let zooko = findZooko(updates[y].records);
+        if(zooko) {
+          prepend(__dirname+"/.posts",`${x},${updates[y].name},${zooko}`,(err) => {});
+        }
+      }
+    }
+  }
+  fs.writeFileSync(__dirname+"/.lastBlock",x.toString());
+})();

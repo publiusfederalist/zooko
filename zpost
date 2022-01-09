@@ -1,0 +1,102 @@
+#!/usr/bin/env node
+const {WalletClient, NodeClient} = require('hs-client');
+const {Network} = require('hsd');
+const fs = require('fs');
+const constants = require('./lib/constants.js');
+const readline = require('readline');
+const writable = require('stream').Writable;
+
+var mutable = new writable({
+  write: function(chunk, encoding, callback) {
+    if (!this.muted)
+      process.stdout.write(chunk, encoding);
+    callback();
+  }
+});
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: mutable,
+  terminal: true
+});
+mutable.muted = false;
+
+const network = Network.get('main');
+
+const nodeOptions = {
+  network: network.type,
+  port: network.rpcPort,
+  apiKey: fs.readFileSync(__dirname+"/keys/node").toString().trim()
+}
+const walletOptions = {
+  network: network.type,
+  port: network.walletPort,
+  apiKey: fs.readFileSync(__dirname+"/keys/wallet").toString().trim()
+}
+
+const nodeClient = new NodeClient(nodeOptions);
+const walletClient = new WalletClient(walletOptions);
+
+async function getNameResource(name) { 
+  let rr = await nodeClient.execute('getnameresource', [name])
+  if(rr)
+    return rr.records;
+  return null;
+}
+async function _writeZooko(name,message) {
+  if(message.length+constants.MAX_TXT>constants.MAGIC_ZOOKO)
+    return null;
+  let records = await getNameResource(name);
+  if(records) {
+    let returnRecord = [];
+    for(let x=0;x<records.length;x++) {
+      let rec = records[x];
+      if(rec.type=="TXT") {
+        if(rec.txt) {
+          if(rec.txt[0].startsWith(constants.MAGIC_ZOOKO))
+            continue;
+        }
+      }
+      returnRecord.push(rec);
+    }
+    returnRecord.push({type:"TXT",txt:[message]});
+    return returnRecord;
+  }
+  else {
+    return null;
+  }
+}
+async function writeZooko(name, message) { return await _writeZooko(name, constants.MAGIC_ZOOKO+message) }
+
+(async function() {
+  const argc = process.argv.length;
+  const argv = process.argv;
+  if(argc != 5) {
+    console.log("Usage: ",argv[1],"<wallet-id>","<name>","\"<message>\"");
+    process.exit(0);
+  }
+  const wallet = walletClient.wallet(argv[2]);
+  if(!wallet) {
+    console.log("Wallet ",argv[2],"not found");
+    process.exit(0);
+  }
+  console.log("Enter Password:");
+  const it = rl[Symbol.asyncIterator]();
+  mutable.muted = true;
+  const password = (await it.next()).value
+  mutable.muted = false;
+  const options = {passphrase:password,name:argv[3],broadcast:true,sign:true,data:{records: await writeZooko(argv[3],argv[4])}};
+  if(!options.records) {
+    console.log("Zooko failed (message too long?)");
+    process.exit(0);
+  }
+  let result;
+  try {
+    result = await wallet.createUpdate(options);
+  } catch(e) {
+    console.log("Zooko failed (incorrect password or need to wait until next block?)");
+    process.exit(0);
+  }
+  console.log(result);            
+  process.exit(0);
+})();
+

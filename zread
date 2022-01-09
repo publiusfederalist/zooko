@@ -1,0 +1,48 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const constants = require('./lib/constants.js');
+
+const argv = process.argv;
+const argc = process.argv.length;
+
+if(argc != 3 && argc != 2) {
+  console.log("Usage: ",argv[1],"<name>");
+  console.log("or");
+  console.log(argv[1],"<block>");
+  console.log("or");
+  console.log(argv[1]);
+  process.exit(0);
+}
+
+(async function() {
+  let posts = fs.readFileSync(__dirname+"/.posts").toString().split("\n");
+  if(argc==2) {
+    for(let x=0;x < posts.length && x<constants.POST_PAGE_LIMIT;x++) {
+      let post = posts[x].match(/(\d+)\,([^\,]+)\,(.*)/i);
+      if(post)
+        console.log(`${post[2]} @ ${post[1]}: ${post[3]}`);
+    }
+  }
+  else if(parseInt(argv[2])==argv[2]) {
+    let y = 0;
+    for(let x=0;x < posts.length && y<constants.POST_PAGE_LIMIT;x++) {
+      const regex = new RegExp(`${argv[2]},([^,]+),(.*)`,"i");
+      let post = posts[x].match(regex);
+      if(post) {
+        console.log(`${post[1]}: ${post[2]}`);
+        y++;
+      }
+    }
+  }
+  else {
+    let y = 0;
+    for(let x=0;x < posts.length && y<constants.POST_PAGE_LIMIT;x++) {
+      const regex = new RegExp(`(\\d+),${argv[2]},(.*)`,"i");
+      let post = posts[x].match(regex);
+      if(post) {
+        console.log(`@ ${post[1]}: ${post[2]}`);
+        y++;
+      }
+    }
+  }
+})();
