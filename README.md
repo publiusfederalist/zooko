@@ -31,6 +31,12 @@ Zooko will copy your DNS resource records over everytime you post, while replaci
 
 This is a quick, and simple, proof of concept.  If someone was to build this into a full blown microblogging platform, a lot more "protocol" would likely need to be developed to integrate different kinds of interactions as well as 'compound interactions' using multiple strings in TXT records, which could allow for more than 1 action per block only limited by resource record max size limit.  One could also hook this into the websocket to watch both the mempool and, as well, for new blocks.  Finally, of course, someone could utilize web technologies and build a beautiful interface for this.
 
+## Why Handshake?
+
+Handshake has been gaining incredible traction, including from institutional bodies like Namecheap, the second biggest DNS registrar on the Internet.  This traction means that Handshake is winning favor with the community and that the Handshake blockchain has secured its space in the cyberworld.  Some questions arise as to whether or not Zooko will bloat the blockchain.  With the UPDATE limitation to one (1) per block, I don't think it will.  However, it was important to use Handshake because doing so anywhere else would cause this to be blockable.  By leveraging Handshake, the entire blockchain would have to be blocked in order to block Zooko.  This is highly unlikely because Handshake is too popular.
+
+This is why I chose to build this on Handshake.
+
 ## How to Install
 1. Clone
 ```
