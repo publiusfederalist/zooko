@@ -11,6 +11,8 @@ Zooko was named after [Zooko Wilcox O'Hearn](https://en.wikipedia.org/wiki/Zooko
 
 We're still writing code.
 
+![Zooko](https://raw.githubusercontent.com/publiusfederalist/zooko/master/zooko.png)
+
 ## How it Works
 
 Handshake is an incredibly secure blockchain.  While many other chains are easy to abuse, Handshake is not one of them.  That being said, there was one outlet that we could take advantage of, and that is the **UPDATE** [covenant](https://github.com/handshake-org/hsd/blob/master/lib/covenants/rules.js) which allows for a DNS resource record with several types, GLUE, NS, among others, and most importantly, TXT.
