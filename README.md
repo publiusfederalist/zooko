@@ -49,7 +49,8 @@ cd zooko
 npm install hs-client hsd prepend readline stream
 ```
 
-3. Setup wallet and node keys in the `keys` folder.  If you use Bob, it is in the Setup.  If you use hsd, you probably know how to do this already.
+3. Setup wallet and node keys in the `keys` folder.  You'll need to be sure you have hsd running properly with index-tx, index-address and other options enabled.
+
 
 4. Now, just try it!
 
