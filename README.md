@@ -49,7 +49,7 @@ cd zooko
 npm install hs-client hsd prepend readline stream
 ```
 
-3. Setup wallet and node keys in the `keys` folder.  You'll need to be sure you have hsd running properly with index-tx, index-address and other options enabled.
+3. Setup wallet and node keys in the `keys` folder.
 
 
 4. Now, just try it!
