@@ -52,7 +52,7 @@ async function _writeZooko(name,message) {
       let rec = records[x];
       if(rec.type=="TXT") {
         if(rec.txt) {
-          if(rec.txt[0].startsWith(constants.MAGIC_ZOOKO))
+          if(rec.txt[0].startsWith(constants.MAGIC_ZOOKO) || rec.txt[0].startsWith(constants.MAGIC_ZMSG))
             continue;
         }
       }
