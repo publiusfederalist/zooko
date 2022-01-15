@@ -1,7 +1,7 @@
 # Zooko
 ### Truly decentralized, immutable and uncensorable microblogging
 
-# [Why I Quit Handshake](https://github.com/publiusfederalist/why-i-quit-handshake)
+## Learn more by joining the [Handshake Discord Community](https://discord.gg/tXJ2UdGuda)
 
 Zooko is a working-example, proof-of-concept proving that you can have a decentralized, immutable, and uncensorable microblog platform (like "twitter") in a truly decentralized manner without needing any 3rd party APIs and simply relying on cryptography.
 
