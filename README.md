@@ -48,7 +48,7 @@ git clone https://github.com/publiusfederalist/zooko
 2. Get prepared
 ```
 cd zooko
-npm install hs-client hsd prepend readline stream
+npm install hs-client hsd prepend readline stream consoleinout
 ```
 
 3. Setup wallet and node keys in the `keys` folder.

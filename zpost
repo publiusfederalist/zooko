@@ -3,23 +3,7 @@ const {WalletClient, NodeClient} = require('hs-client');
 const {Network} = require('hsd');
 const fs = require('fs');
 const constants = require('./lib/constants.js');
-const readline = require('readline');
-const writable = require('stream').Writable;
-
-var mutable = new writable({
-  write: function(chunk, encoding, callback) {
-    if (!this.muted)
-      process.stdout.write(chunk, encoding);
-    callback();
-  }
-});
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: mutable,
-  terminal: true
-});
-mutable.muted = false;
-
+const ConsoleIO = new (require("consoleinout"))(console);
 const network = Network.get('main');
 
 const nodeOptions = {
@@ -80,11 +64,9 @@ async function writeZooko(name, message) { return await _writeZooko(name, consta
     console.log("Wallet ",argv[2],"not found");
     process.exit(0);
   }
-  console.log("Enter Password:");
-  const it = rl[Symbol.asyncIterator]();
-  mutable.muted = true;
-  const password = (await it.next()).value
-  mutable.muted = false;
+  console.output("Enter Password: ");
+  const password = await console.input(true);
+
   const records = await writeZooko(argv[3],argv[4]);
   const options = {passphrase:password,name:argv[3],broadcast:true,sign:true,data:{records: records}};
   if(!options.data.records) {
